@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+
+<body>
+  <form>
+    <input id="text" placeholder="文本" />
+    <input id="strs" placeholder="填充二维码的字符" />
+    填充的字符是中文吗？
+    <select id="strsType" value="中文">
+      <option value="中文">中文</option>
+      <option value="英文">非中文字符</option>
+    </select>
+    <button id="submit">生成二维码</button>
+  </form>
+  <div style="background: black;">
+    <pre style="background-color: black;color: white;padding:20px;font-size: 9px;"><code id="app" ></code></pre>
+  </div>
+  <script type="module">
+    import qrJs from 'https://cdn.skypack.dev/qr.js'
+
+    let index = -1
+    function makeStr(bool, strs, type) {
+      index = (index + 1) % strs.length
+      const black = type === '中文' ? '◾' : ' '
+      return bool ? black : strs[index]
+    }
+    function makeQr(content, strs, type) {
+      const qrcode = qrJs(content)
+      const code = qrcode.modules
+      let res = ''
+      const border = makeStr(false, strs, type).repeat(code[0].length + 1).repeat(2)
+      res += border + '\n'
+      for (let i = 0; i < code.length; i++) {
+        res += makeStr(false, strs, type)
+        for (let j = 0; j < code[i].length; j++) {
+          const item = makeStr(code[i][j], strs, type)
+          res += item
+          const item2 = makeStr(code[i][j], strs, type)
+          res += item2
+        }
+        res += makeStr(false, strs, type)
+        res += '\n'
+      }
+      res += border + '\n'
+      app.innerHTML = res
+    }
+    makeQr("lxhyl.cn", ['测', '试'], '中文')
+
+    let timer
+    submit.onclick = function (e) {
+      e.preventDefault()
+      clearInterval(timer)
+      const textValue = text.value.trim() || "lxhyl.cn"
+      let strsValue = strs.value.trim()
+      strsValue = strsValue ? strsValue.split('') : ['测', '试']
+      const type = strsType.value
+      makeQr(textValue, strsValue, type)
+    }
+  </script>
+</body>
+
+</html>
